@@ -6,6 +6,15 @@ This is an exploratory plugin, mostly made for sharing the code for other to try
 
 ## Install
 
+### zk
+
+You can install `zk` with Homebrew
+
+```sh
+$ brew tap mhanberg/zk
+$ brew install --HEAD zk # head is currently required.
+```
+
 ### vim-plug
 
 ```vim
