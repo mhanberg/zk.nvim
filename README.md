@@ -82,22 +82,27 @@ When fzfing over notes, you can use the following keybinds
 
 ## Lua API
 
-zk.nvim provides the ability to call any of the custom actions provided by the zk language server with the results executed by a callback.
+zk.nvim provides the ability to call any of the custom actions provided by the zk language server as well as some higher level commands.
 
 Some of the commands provide default callback and can be found [here](https://github.com/mhanberg/zk.nvim/blob/main/lua/zk/init.lua).
 
 ```lua
 local zk = require("zk")
 
+-- zk custom actions
+
 zk.new({title = "new note!"})
+local err, notes = zk.list({select = {"title", "filename"}})
+local err, tags = zk["tag.list"]()
 
-zk.list({select = {"title", "filename"}}, function(err, notes)
-  print(vim.inspect(notes))
-end)
+-- zk.nvim provided functions
 
-zk["tag.list"](nil, function(err, tags)
-  print(vim.inspect(tags))
-end)
+-- Get a single note by it's file path, can also take a list of fields to return. Defaults to `{"title", "absPath"}`
+local err, note = zk.get(file_path)
+local err, note = zk.get(file_path, {"title", "tags", "filename"})
+
+-- Initialize zk.nvim, set the Setup section for more info
+zk.setup(opts)
 ```
 
 The commands are powered by the following two lua functions.
@@ -123,3 +128,11 @@ fzf({
   window = { width = 0.9, height = 0.6, yoffset = 0, highlight = "Normal" },
 })
 ```
+
+## Examples
+
+For examples of how to, please see my dotfiles.
+
+- [Setup](https://github.com/mhanberg/.dotfiles/blob/82737f009fb9acb23922ddb8fe63e8e191653d6b/config/nvim/init.lua#L157)
+- [zk.get](https://github.com/mhanberg/.dotfiles/blob/82737f009fb9acb23922ddb8fe63e8e191653d6b/config/nvim/plugin/dnd.lua#L6)
+- [zk.list](https://github.com/mhanberg/.dotfiles/blob/82737f009fb9acb23922ddb8fe63e8e191653d6b/config/nvim/plugin/dnd.lua#L13)
