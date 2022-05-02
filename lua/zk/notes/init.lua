@@ -27,6 +27,8 @@ local actions = {
 	end,
 }
 
+local delimiter = "\x01 "
+
 local options = {
 	"--expect",
 	"enter,ctrl-v,ctrl-x,ctrl-n",
@@ -35,7 +37,7 @@ local options = {
 	"--print-query",
 	"--ansi",
 	"--delimiter",
-	":",
+	delimiter,
 	"--preview",
 	"bat {-1}",
 	"--nth",
@@ -48,7 +50,10 @@ local to_note_entry = function(n)
 	local sep = " "
 	local tags = vim.fn.join(vim.tbl_map(prepend_hash, n.tags or {}), sep)
 
-	return ansi("%{bright}%{yellow}" .. n.title) .. " : " .. ansi("%{red}" .. tags) .. ansi("%{italic}%{dim} : " .. n.absPath)
+	return ansi("%{bright}%{yellow}" .. (n.title or ""))
+		.. delimiter
+		.. ansi("%{red}" .. tags)
+		.. ansi("%{italic}%{dim}" .. delimiter .. n.absPath)
 end
 
 notes.find = function(...)
@@ -70,7 +75,7 @@ notes.find = function(...)
 		sinklist = function(selected)
 			local query = selected[1]
 			local action = actions[selected[2]]
-			local parts = vim.fn.split(selected[3], ":")
+			local parts = vim.fn.split(selected[3], delimiter)
 
 			action(parts[#parts], query)
 		end,

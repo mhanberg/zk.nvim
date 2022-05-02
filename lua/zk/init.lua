@@ -46,7 +46,7 @@ local get = function(file_path, fields)
 	local default_fields = { "title", "absPath" }
 	local err, result = zk.list({ select = fields or default_fields, limit = 1, hrefs = { file_path } })
 
-  return err, result[1]
+	return err, result[1]
 end
 
 local funcs = {
