@@ -22,7 +22,7 @@ local actions = {
 	["ctrl-x"] = function(selected)
 		vim.fn.execute("split " .. selected)
 	end,
-	["ctrl-n"] = function(_, query)
+	["ctrl-e"] = function(_, query)
 		zk.new({ title = query })
 	end,
 }
@@ -33,7 +33,7 @@ local options = {
 	"--expect",
 	"enter,ctrl-v,ctrl-x,ctrl-n",
 	"--header",
-	ansi("%{blue}CTRL-N: create a note with the query as title"),
+	ansi("%{blue}CTRL-E: create a note with the query as title"),
 	"--print-query",
 	"--ansi",
 	"--delimiter",
