@@ -31,7 +31,7 @@ local delimiter = "\x01 "
 
 local options = {
 	"--expect",
-	"enter,ctrl-v,ctrl-x,ctrl-n",
+	"enter,ctrl-v,ctrl-x,ctrl-e",
 	"--header",
 	ansi("%{blue}CTRL-E: create a note with the query as title"),
 	"--print-query",
