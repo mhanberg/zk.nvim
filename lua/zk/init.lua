@@ -3,13 +3,9 @@ local lsp = vim.lsp
 local zk = {}
 
 local get_zk_client = function()
-  local active_clients = lsp.get_active_clients()
-  for _, client in ipairs(active_clients) do
-    if client.name == "zk" then
-      return client
-    end
-  end
-  return nil
+  local clients = lsp.get_clients { name = "zk" }
+
+  return clients[1]
 end
 
 local default_callbacks = {

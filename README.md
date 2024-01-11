@@ -1,8 +1,6 @@
 # zk.nvim
 
-A plugin for interacting with the [zk](https://github.com/mickael-menu/zk) language server and fzf.
-
-This is an exploratory plugin, mostly made for sharing the code for other to try.
+A plugin for interacting with the [zk](https://github.com/mickael-menu/zk) language server and fzf-lua.
 
 ## Install
 
@@ -11,15 +9,13 @@ This is an exploratory plugin, mostly made for sharing the code for other to try
 You can install `zk` with Homebrew
 
 ```sh
-$ brew tap mhanberg/zk
-$ brew install --HEAD zk # head is currently required.
+$ brew install zk
 ```
 
 ### vim-plug
 
 ```vim
-Plug "junegunn/fzf"
-Plug "junegunn/fzf.vim"
+Plug "ibhagwan/fzf-lua"
 Plug "neovim/lspconfig"
 Plug "mhanberg/zk.nvim"
 ```
@@ -30,8 +26,7 @@ Plug "mhanberg/zk.nvim"
 use {
   "mhanberg/zk.nvim",
   requires = {
-    "junegunn/fzf",
-    "junegunn/fzf.vim",
+    "ibhagwan/fzf-lua",
     "neovim/lspconfig"
   }
 }
@@ -79,6 +74,7 @@ When fzfing over notes, you can use the following keybinds
 - `ctrl-v`: open note in a vertical split.
 - `ctrl-x`: open note in a horizontal split.
 - `ctrl-t`: open note in a new tab page.
+- `ctrl-e`: create a new note with the current query.
 
 ## Lua API
 
@@ -105,29 +101,10 @@ local err, note = zk.get(file_path, {"title", "tags", "filename"})
 zk.setup(opts)
 ```
 
-The commands are powered by the following two lua functions.
+The commands are powered by the following two Lua functions.
 
 - `require("zk.notes").find(opts)` - takes the options documented [here](https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist).
 - `require("zk.notes").find_by_tag()`
-
-### FZF
-
-This plugin also provides a lua helper function for calling fzf. This is done by creating a vimscript wrapper function for `fzf#run(fzf#wrap(opts))`. Please see the fzf documentation for more information.
-
-```lua
-local fzf = require("zk.fzf")
-
-fzf({
-  source = {"list", "of", "entries",
-  sinklist = function(selected)
-    -- the lua vimscript wrapper allows us to use a lua function as the sink or sinklist.o
-
-    print(selected)
-  end,
-  options = options,
-  window = { width = 0.9, height = 0.6, yoffset = 0, highlight = "Normal" },
-})
-```
 
 ## Examples
 

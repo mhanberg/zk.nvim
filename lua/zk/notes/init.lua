@@ -1,6 +1,26 @@
 local zk = require("zk")
-local fzf = require("zk.fzf")
+local fzf = require("fzf-lua").fzf_exec
 local ansi = require("zk.ansicolors")
+
+local delimiter = "\x01 "
+local builtin = require("fzf-lua.previewer.builtin")
+
+-- Inherit from the "buffer_or_file" previewer
+local MyPreviewer = builtin.buffer_or_file:extend()
+
+function MyPreviewer:new(o, opts, fzf_win)
+  MyPreviewer.super.new(self, o, opts, fzf_win)
+  setmetatable(self, MyPreviewer)
+  return self
+end
+
+function MyPreviewer:parse_entry(entry_str)
+  -- Assume an arbitrary entry in the format of 'file:line'
+  local splat = vim.fn.split(entry_str, delimiter)
+  return {
+    path = splat[3],
+  }
+end
 
 local notes = {}
 
@@ -16,38 +36,12 @@ local default_opts = function(opts)
   )
 end
 
-local actions = {
-  ["enter"] = function(selected)
-    vim.fn.execute("edit " .. selected)
-  end,
-  ["ctrl-v"] = function(selected)
-    vim.fn.execute("vsplit " .. selected)
-  end,
-  ["ctrl-x"] = function(selected)
-    vim.fn.execute("split " .. selected)
-  end,
-  ["ctrl-e"] = function(_, query)
-    zk.new { title = query }
-  end,
-}
-
-local delimiter = "\x01 "
-
 local options = {
-  "--expect",
-  "enter,ctrl-v,ctrl-x,ctrl-e",
-  "--header",
-  ansi("%{blue}CTRL-E: create a note with the query as title"),
-  "--print-query",
-  "--ansi",
-  "--delimiter",
-  delimiter,
-  "--preview",
-  "bat {-1}",
-  "--nth",
-  "1..2",
-  "--prompt",
-  "Notes> ",
+  ["--print-query"] = "",
+  ["--ansi"] = "",
+  ["--header"] = vim.print(ansi("'%{blue}CTRL-E: create a note with the query as title'")),
+  ["--delimiter"] = delimiter,
+  ["--nth"] = "1..2",
 }
 
 local to_note_entry = function(n)
@@ -74,18 +68,33 @@ notes.find = function(...)
     return
   end
 
-  fzf {
-    source = vim.tbl_map(to_note_entry, result),
-    sinklist = function(selected)
-      local query = selected[1]
-      local action = actions[selected[2]]
-      local parts = vim.fn.split(selected[3], delimiter)
-
-      action(parts[#parts], query)
-    end,
-    options = options,
-    window = { width = 0.9, height = 0.6, yoffset = 0, highlight = "Normal" },
-  }
+  fzf(vim.tbl_map(to_note_entry, result), {
+    actions = {
+      ["enter"] = function(selected)
+        local parts = vim.fn.split(selected[1], delimiter)
+        local picked = parts[#parts]
+        vim.fn.execute("edit " .. picked)
+      end,
+      ["ctrl-v"] = function(selected)
+        local parts = vim.fn.split(selected[1], delimiter)
+        local picked = parts[#parts]
+        vim.fn.execute("vsplit " .. picked)
+      end,
+      ["ctrl-x"] = function(selected)
+        local parts = vim.fn.split(selected[1], delimiter)
+        local picked = parts[#parts]
+        vim.fn.execute("split " .. picked)
+      end,
+      ["ctrl-e"] = function()
+        local query = require("fzf-lua").config.__resume_data.last_query
+        zk.new { title = query }
+      end,
+    },
+    prompt = "Notes> ",
+    fzf_opts = options,
+    win_opts = { width = 0.9, height = 0.6, row = 0 },
+    previewer = MyPreviewer,
+  })
 end
 
 notes.find_by_tag = function()
@@ -99,14 +108,16 @@ notes.find_by_tag = function()
     return t.name
   end, result)
 
-  fzf {
-    source = tags,
-    sink = function(tag)
-      notes.find { tags = { tag } }
-    end,
-    options = { "--ansi", "--prompt", "Tags> " },
-    window = { width = 0.9, height = 0.6, yoffset = 0, highlight = "Normal" },
-  }
+  fzf(tags, {
+    actions = {
+      ["enter"] = function(selected)
+        notes.find { tags = { selected[1] } }
+      end,
+    },
+    prompt = "Tags> ",
+    fzf_opts = options,
+    win_opts = { width = 0.9, height = 0.6, row = 0 },
+  })
 end
 
 return notes
