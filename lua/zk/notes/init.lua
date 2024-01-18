@@ -39,7 +39,7 @@ end
 local options = {
   ["--print-query"] = "",
   ["--ansi"] = "",
-  ["--header"] = vim.print(ansi("'%{blue}CTRL-E: create a note with the query as title'")),
+  ["--header"] = ansi("'%{blue}CTRL-E: create a note with the query as title'"),
   ["--delimiter"] = delimiter,
   ["--nth"] = "1..2",
 }
